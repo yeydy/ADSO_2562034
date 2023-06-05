@@ -1,259 +1,740 @@
-DROP DATABASE IF EXISTS universidad;
-CREATE DATABASE universidad CHARACTER SET utf8mb4;
-USE universidad;
- 
-CREATE TABLE departamento (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 15.2
+-- Dumped by pg_dump version 15.2
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: alumno_se_matricula_asignatura; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.alumno_se_matricula_asignatura (
+    id_alumno integer NOT NULL,
+    id_asignatura integer NOT NULL,
+    id_curso_escolar integer NOT NULL
 );
 
-CREATE TABLE persona (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nif VARCHAR(9) UNIQUE,
-    nombre VARCHAR(25) NOT NULL,
-    apellido1 VARCHAR(50) NOT NULL,
-    apellido2 VARCHAR(50),
-    ciudad VARCHAR(25) NOT NULL,
-    direccion VARCHAR(50) NOT NULL,
-    telefono VARCHAR(9),
-    fecha_nacimiento DATE NOT NULL,
-    sexo ENUM('H', 'M') NOT NULL,
-    tipo ENUM('profesor', 'alumno') NOT NULL
-);
- 
-CREATE TABLE profesor (
-    id_profesor INT UNSIGNED PRIMARY KEY,
-    id_departamento INT UNSIGNED NOT NULL,
-    FOREIGN KEY (id_profesor) REFERENCES persona(id),
-    FOREIGN KEY (id_departamento) REFERENCES departamento(id)
-);
- 
- CREATE TABLE grado (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL
-);
- 
-CREATE TABLE asignatura (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    creditos FLOAT UNSIGNED NOT NULL,
-    tipo ENUM('básica', 'obligatoria', 'optativa') NOT NULL,
-    curso TINYINT UNSIGNED NOT NULL,
-    cuatrimestre TINYINT UNSIGNED NOT NULL,
-    id_profesor INT UNSIGNED,
-    id_grado INT UNSIGNED NOT NULL,
-    FOREIGN KEY(id_profesor) REFERENCES profesor(id_profesor),
-    FOREIGN KEY(id_grado) REFERENCES grado(id)
-);
- 
-CREATE TABLE curso_escolar (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    anyo_inicio YEAR NOT NULL,
-    anyo_fin YEAR NOT NULL
+
+ALTER TABLE public.alumno_se_matricula_asignatura OWNER TO postgres;
+
+--
+-- Name: asignatura; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.asignatura (
+    id integer NOT NULL,
+    nombre character varying(100) NOT NULL,
+    creditos double precision NOT NULL,
+    tipo character varying(15) NOT NULL,
+    curso smallint NOT NULL,
+    cuatrimestre smallint NOT NULL,
+    id_profesor integer,
+    id_grado integer NOT NULL,
+    CONSTRAINT asignatura_tipo_check CHECK (((tipo)::text = ANY ((ARRAY['b sica'::character varying, 'obligatoria'::character varying, 'optativa'::character varying])::text[])))
 );
 
-CREATE TABLE alumno_se_matricula_asignatura (
-    id_alumno INT UNSIGNED NOT NULL,
-    id_asignatura INT UNSIGNED NOT NULL,
-    id_curso_escolar INT UNSIGNED NOT NULL,
-    PRIMARY KEY (id_alumno, id_asignatura, id_curso_escolar),
-    FOREIGN KEY (id_alumno) REFERENCES persona(id),
-    FOREIGN KEY (id_asignatura) REFERENCES asignatura(id),
-    FOREIGN KEY (id_curso_escolar) REFERENCES curso_escolar(id)
+
+ALTER TABLE public.asignatura OWNER TO postgres;
+
+--
+-- Name: asignatura_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.asignatura_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.asignatura_id_seq OWNER TO postgres;
+
+--
+-- Name: asignatura_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.asignatura_id_seq OWNED BY public.asignatura.id;
+
+
+--
+-- Name: curso_escolar; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.curso_escolar (
+    id integer NOT NULL,
+    year_inicio date NOT NULL,
+    year_fin date NOT NULL
 );
- 
- /* Departamento */
-INSERT INTO departamento VALUES (1, 'Informática');
-INSERT INTO departamento VALUES (2, 'Matemáticas');
-INSERT INTO departamento VALUES (3, 'Economía y Empresa');
-INSERT INTO departamento VALUES (4, 'Educación');
-INSERT INTO departamento VALUES (5, 'Agronomía');
-INSERT INTO departamento VALUES (6, 'Química y Física');
-INSERT INTO departamento VALUES (7, 'Filología');
-INSERT INTO departamento VALUES (8, 'Derecho');
-INSERT INTO departamento VALUES (9, 'Biología y Geología');
- 
- /* Persona */
-INSERT INTO persona VALUES (1, '26902806M', 'Salvador', 'Sánchez', 'Pérez', 'Almería', 'C/ Real del barrio alto', '950254837', '1991/03/28', 'H', 'alumno');
-INSERT INTO persona VALUES (2, '89542419S', 'Juan', 'Saez', 'Vega', 'Almería', 'C/ Mercurio', '618253876', '1992/08/08', 'H', 'alumno');
-INSERT INTO persona VALUES (3, '11105554G', 'Zoe', 'Ramirez', 'Gea', 'Almería', 'C/ Marte', '618223876', '1979/08/19', 'M', 'profesor');
-INSERT INTO persona VALUES (4, '17105885A', 'Pedro', 'Heller', 'Pagac', 'Almería', 'C/ Estrella fugaz', NULL, '2000/10/05', 'H', 'alumno');
-INSERT INTO persona VALUES (5, '38223286T', 'David', 'Schmidt', 'Fisher', 'Almería', 'C/ Venus', '678516294', '1978/01/19', 'H', 'profesor');
-INSERT INTO persona VALUES (6, '04233869Y', 'José', 'Koss', 'Bayer', 'Almería', 'C/ Júpiter', '628349590', '1998/01/28', 'H', 'alumno');
-INSERT INTO persona VALUES (7, '97258166K', 'Ismael', 'Strosin', 'Turcotte', 'Almería', 'C/ Neptuno', NULL, '1999/05/24', 'H', 'alumno');
-INSERT INTO persona VALUES (8, '79503962T', 'Cristina', 'Lemke', 'Rutherford', 'Almería', 'C/ Saturno', '669162534', '1977/08/21', 'M', 'profesor');
-INSERT INTO persona VALUES (9, '82842571K', 'Ramón', 'Herzog', 'Tremblay', 'Almería', 'C/ Urano', '626351429', '1996/11/21', 'H', 'alumno');
-INSERT INTO persona VALUES (10, '61142000L', 'Esther', 'Spencer', 'Lakin', 'Almería', 'C/ Plutón', NULL, '1977/05/19', 'M', 'profesor');
-INSERT INTO persona VALUES (11, '46900725E', 'Daniel', 'Herman', 'Pacocha', 'Almería', 'C/ Andarax', '679837625', '1997/04/26', 'H', 'alumno');
-INSERT INTO persona VALUES (12, '85366986W', 'Carmen', 'Streich', 'Hirthe', 'Almería', 'C/ Almanzora', NULL, '1971-04-29', 'M', 'profesor');
-INSERT INTO persona VALUES (13, '73571384L', 'Alfredo', 'Stiedemann', 'Morissette', 'Almería', 'C/ Guadalquivir', '950896725', '1980/02/01', 'H', 'profesor');
-INSERT INTO persona VALUES (14, '82937751G', 'Manolo', 'Hamill', 'Kozey', 'Almería', 'C/ Duero', '950263514', '1977/01/02', 'H', 'profesor');
-INSERT INTO persona VALUES (15, '80502866Z', 'Alejandro', 'Kohler', 'Schoen', 'Almería', 'C/ Tajo', '668726354', '1980/03/14', 'H', 'profesor');
-INSERT INTO persona VALUES (16, '10485008K', 'Antonio', 'Fahey', 'Considine', 'Almería', 'C/ Sierra de los Filabres', NULL, '1982/03/18', 'H', 'profesor');
-INSERT INTO persona VALUES (17, '85869555K', 'Guillermo', 'Ruecker', 'Upton', 'Almería', 'C/ Sierra de Gádor', NULL, '1973/05/05', 'H', 'profesor');
-INSERT INTO persona VALUES (18, '04326833G', 'Micaela', 'Monahan', 'Murray', 'Almería', 'C/ Veleta', '662765413', '1976/02/25', 'H', 'profesor');
-INSERT INTO persona VALUES (19, '11578526G', 'Inma', 'Lakin', 'Yundt', 'Almería', 'C/ Picos de Europa', '678652431', '1998/09/01', 'M', 'alumno');
-INSERT INTO persona VALUES (20, '79221403L', 'Francesca', 'Schowalter', 'Muller', 'Almería', 'C/ Quinto pino', NULL, '1980/10/31', 'H', 'profesor');
-INSERT INTO persona VALUES (21, '79089577Y', 'Juan', 'Gutiérrez', 'López', 'Almería', 'C/ Los pinos', '678652431', '1998/01/01', 'H', 'alumno');
-INSERT INTO persona VALUES (22, '41491230N', 'Antonio', 'Domínguez', 'Guerrero', 'Almería', 'C/ Cabo de Gata', '626652498', '1999/02/11', 'H', 'alumno');
-INSERT INTO persona VALUES (23, '64753215G', 'Irene', 'Hernández', 'Martínez', 'Almería', 'C/ Zapillo', '628452384', '1996/03/12', 'M', 'alumno');
-INSERT INTO persona VALUES (24, '85135690V', 'Sonia', 'Gea', 'Ruiz', 'Almería', 'C/ Mercurio', '678812017', '1995/04/13', 'M', 'alumno');
- 
-/* Profesor */
-INSERT INTO profesor VALUES (3, 1);
-INSERT INTO profesor VALUES (5, 2);
-INSERT INTO profesor VALUES (8, 3);
-INSERT INTO profesor VALUES (10, 4);
-INSERT INTO profesor VALUES (12, 4);
-INSERT INTO profesor VALUES (13, 6);
-INSERT INTO profesor VALUES (14, 1);
-INSERT INTO profesor VALUES (15, 2);
-INSERT INTO profesor VALUES (16, 3);
-INSERT INTO profesor VALUES (17, 4);
-INSERT INTO profesor VALUES (18, 5);
-INSERT INTO profesor VALUES (20, 6);
- 
- /* Grado */
-INSERT INTO grado VALUES (1, 'Grado en Ingeniería Agrícola (Plan 2015)');
-INSERT INTO grado VALUES (2, 'Grado en Ingeniería Eléctrica (Plan 2014)');
-INSERT INTO grado VALUES (3, 'Grado en Ingeniería Electrónica Industrial (Plan 2010)');
-INSERT INTO grado VALUES (4, 'Grado en Ingeniería Informática (Plan 2015)');
-INSERT INTO grado VALUES (5, 'Grado en Ingeniería Mecánica (Plan 2010)');
-INSERT INTO grado VALUES (6, 'Grado en Ingeniería Química Industrial (Plan 2010)');
-INSERT INTO grado VALUES (7, 'Grado en Biotecnología (Plan 2015)');
-INSERT INTO grado VALUES (8, 'Grado en Ciencias Ambientales (Plan 2009)');
-INSERT INTO grado VALUES (9, 'Grado en Matemáticas (Plan 2010)');
-INSERT INTO grado VALUES (10, 'Grado en Química (Plan 2009)');
- 
-/* Asignatura */
-INSERT INTO asignatura VALUES (1, 'Álgegra lineal y matemática discreta', 6, 'básica', 1, 1, 3, 4);
-INSERT INTO asignatura VALUES (2, 'Cálculo', 6, 'básica', 1, 1, 14, 4);
-INSERT INTO asignatura VALUES (3, 'Física para informática', 6, 'básica', 1, 1, 3, 4);
-INSERT INTO asignatura VALUES (4, 'Introducción a la programación', 6, 'básica', 1, 1, 14, 4);
-INSERT INTO asignatura VALUES (5, 'Organización y gestión de empresas', 6, 'básica', 1, 1, 3, 4);
-INSERT INTO asignatura VALUES (6, 'Estadística', 6, 'básica', 1, 2, 14, 4);
-INSERT INTO asignatura VALUES (7, 'Estructura y tecnología de computadores', 6, 'básica', 1, 2, 3, 4);
-INSERT INTO asignatura VALUES (8, 'Fundamentos de electrónica', 6, 'básica', 1, 2, 14, 4);
-INSERT INTO asignatura VALUES (9, 'Lógica y algorítmica', 6, 'básica', 1, 2, 3, 4);
-INSERT INTO asignatura VALUES (10, 'Metodología de la programación', 6, 'básica', 1, 2, 14, 4);
-INSERT INTO asignatura VALUES (11, 'Arquitectura de Computadores', 6, 'básica', 2, 1, 3, 4);
-INSERT INTO asignatura VALUES (12, 'Estructura de Datos y Algoritmos I', 6, 'obligatoria', 2, 1, 3, 4);
-INSERT INTO asignatura VALUES (13, 'Ingeniería del Software', 6, 'obligatoria', 2, 1, 14, 4);
-INSERT INTO asignatura VALUES (14, 'Sistemas Inteligentes', 6, 'obligatoria', 2, 1, 3, 4);
-INSERT INTO asignatura VALUES (15, 'Sistemas Operativos', 6, 'obligatoria', 2, 1, 14, 4);
-INSERT INTO asignatura VALUES (16, 'Bases de Datos', 6, 'básica', 2, 2, 14, 4);
-INSERT INTO asignatura VALUES (17, 'Estructura de Datos y Algoritmos II', 6, 'obligatoria', 2, 2, 14, 4);
-INSERT INTO asignatura VALUES (18, 'Fundamentos de Redes de Computadores', 6 ,'obligatoria', 2, 2, 3, 4);
-INSERT INTO asignatura VALUES (19, 'Planificación y Gestión de Proyectos Informáticos', 6, 'obligatoria', 2, 2, 3, 4);
-INSERT INTO asignatura VALUES (20, 'Programación de Servicios Software', 6, 'obligatoria', 2, 2, 14, 4);
-INSERT INTO asignatura VALUES (21, 'Desarrollo de interfaces de usuario', 6, 'obligatoria', 3, 1, 14, 4);
-INSERT INTO asignatura VALUES (22, 'Ingeniería de Requisitos', 6, 'optativa', 3, 1, NULL, 4);
-INSERT INTO asignatura VALUES (23, 'Integración de las Tecnologías de la Información en las Organizaciones', 6, 'optativa', 3, 1, NULL, 4);
-INSERT INTO asignatura VALUES (24, 'Modelado y Diseño del Software 1', 6, 'optativa', 3, 1, NULL, 4);
-INSERT INTO asignatura VALUES (25, 'Multiprocesadores', 6, 'optativa', 3, 1, NULL, 4);
-INSERT INTO asignatura VALUES (26, 'Seguridad y cumplimiento normativo', 6, 'optativa', 3, 1, NULL, 4);
-INSERT INTO asignatura VALUES (27, 'Sistema de Información para las Organizaciones', 6, 'optativa', 3, 1, NULL, 4); 
-INSERT INTO asignatura VALUES (28, 'Tecnologías web', 6, 'optativa', 3, 1, NULL, 4);
-INSERT INTO asignatura VALUES (29, 'Teoría de códigos y criptografía', 6, 'optativa', 3, 1, NULL, 4);
-INSERT INTO asignatura VALUES (30, 'Administración de bases de datos', 6, 'optativa', 3, 2, NULL, 4);
-INSERT INTO asignatura VALUES (31, 'Herramientas y Métodos de Ingeniería del Software', 6, 'optativa', 3, 2, NULL, 4);
-INSERT INTO asignatura VALUES (32, 'Informática industrial y robótica', 6, 'optativa', 3, 2, NULL, 4);
-INSERT INTO asignatura VALUES (33, 'Ingeniería de Sistemas de Información', 6, 'optativa', 3, 2, NULL, 4);
-INSERT INTO asignatura VALUES (34, 'Modelado y Diseño del Software 2', 6, 'optativa', 3, 2, NULL, 4);
-INSERT INTO asignatura VALUES (35, 'Negocio Electrónico', 6, 'optativa', 3, 2, NULL, 4);
-INSERT INTO asignatura VALUES (36, 'Periféricos e interfaces', 6, 'optativa', 3, 2, NULL, 4);
-INSERT INTO asignatura VALUES (37, 'Sistemas de tiempo real', 6, 'optativa', 3, 2, NULL, 4);
-INSERT INTO asignatura VALUES (38, 'Tecnologías de acceso a red', 6, 'optativa', 3, 2, NULL, 4);
-INSERT INTO asignatura VALUES (39, 'Tratamiento digital de imágenes', 6, 'optativa', 3, 2, NULL, 4);
-INSERT INTO asignatura VALUES (40, 'Administración de redes y sistemas operativos', 6, 'optativa', 4, 1, NULL, 4);
-INSERT INTO asignatura VALUES (41, 'Almacenes de Datos', 6, 'optativa', 4, 1, NULL, 4);
-INSERT INTO asignatura VALUES (42, 'Fiabilidad y Gestión de Riesgos', 6, 'optativa', 4, 1, NULL, 4);
-INSERT INTO asignatura VALUES (43, 'Líneas de Productos Software', 6, 'optativa', 4, 1, NULL, 4);
-INSERT INTO asignatura VALUES (44, 'Procesos de Ingeniería del Software 1', 6, 'optativa', 4, 1, NULL, 4);
-INSERT INTO asignatura VALUES (45, 'Tecnologías multimedia', 6, 'optativa', 4, 1, NULL, 4);
-INSERT INTO asignatura VALUES (46, 'Análisis y planificación de las TI', 6, 'optativa', 4, 2, NULL, 4);
-INSERT INTO asignatura VALUES (47, 'Desarrollo Rápido de Aplicaciones', 6, 'optativa', 4, 2, NULL, 4);
-INSERT INTO asignatura VALUES (48, 'Gestión de la Calidad y de la Innovación Tecnológica', 6, 'optativa', 4, 2, NULL, 4);
-INSERT INTO asignatura VALUES (49, 'Inteligencia del Negocio', 6, 'optativa', 4, 2, NULL, 4);
-INSERT INTO asignatura VALUES (50, 'Procesos de Ingeniería del Software 2', 6, 'optativa', 4, 2, NULL, 4);
-INSERT INTO asignatura VALUES (51, 'Seguridad Informática', 6, 'optativa', 4, 2, NULL, 4);
-INSERT INTO asignatura VALUES (52, 'Biologia celular', 6, 'básica', 1, 1, NULL, 7);
-INSERT INTO asignatura VALUES (53, 'Física', 6, 'básica', 1, 1, NULL, 7);
-INSERT INTO asignatura VALUES (54, 'Matemáticas I', 6, 'básica', 1, 1, NULL, 7);
-INSERT INTO asignatura VALUES (55, 'Química general', 6, 'básica', 1, 1, NULL, 7);
-INSERT INTO asignatura VALUES (56, 'Química orgánica', 6, 'básica', 1, 1, NULL, 7);
-INSERT INTO asignatura VALUES (57, 'Biología vegetal y animal', 6, 'básica', 1, 2, NULL, 7);
-INSERT INTO asignatura VALUES (58, 'Bioquímica', 6, 'básica', 1, 2, NULL, 7);
-INSERT INTO asignatura VALUES (59, 'Genética', 6, 'básica', 1, 2, NULL, 7);
-INSERT INTO asignatura VALUES (60, 'Matemáticas II', 6, 'básica', 1, 2, NULL, 7);
-INSERT INTO asignatura VALUES (61, 'Microbiología', 6, 'básica', 1, 2, NULL, 7);
-INSERT INTO asignatura VALUES (62, 'Botánica agrícola', 6, 'obligatoria', 2, 1, NULL, 7);
-INSERT INTO asignatura VALUES (63, 'Fisiología vegetal', 6, 'obligatoria', 2, 1, NULL, 7);
-INSERT INTO asignatura VALUES (64, 'Genética molecular', 6, 'obligatoria', 2, 1, NULL, 7);
-INSERT INTO asignatura VALUES (65, 'Ingeniería bioquímica', 6, 'obligatoria', 2, 1, NULL, 7);
-INSERT INTO asignatura VALUES (66, 'Termodinámica y cinética química aplicada', 6, 'obligatoria', 2, 1, NULL, 7);
-INSERT INTO asignatura VALUES (67, 'Biorreactores', 6, 'obligatoria', 2, 2, NULL, 7);
-INSERT INTO asignatura VALUES (68, 'Biotecnología microbiana', 6, 'obligatoria', 2, 2, NULL, 7);
-INSERT INTO asignatura VALUES (69, 'Ingeniería genética', 6, 'obligatoria', 2, 2, NULL, 7);
-INSERT INTO asignatura VALUES (70, 'Inmunología', 6, 'obligatoria', 2, 2, NULL, 7);
-INSERT INTO asignatura VALUES (71, 'Virología', 6, 'obligatoria', 2, 2, NULL, 7);
-INSERT INTO asignatura VALUES (72, 'Bases moleculares del desarrollo vegetal', 4.5, 'obligatoria', 3, 1, NULL, 7);
-INSERT INTO asignatura VALUES (73, 'Fisiología animal', 4.5, 'obligatoria', 3, 1, NULL, 7);
-INSERT INTO asignatura VALUES (74, 'Metabolismo y biosíntesis de biomoléculas', 6, 'obligatoria', 3, 1, NULL, 7);
-INSERT INTO asignatura VALUES (75, 'Operaciones de separación', 6, 'obligatoria', 3, 1, NULL, 7);
-INSERT INTO asignatura VALUES (76, 'Patología molecular de plantas', 4.5, 'obligatoria', 3, 1, NULL, 7);
-INSERT INTO asignatura VALUES (77, 'Técnicas instrumentales básicas', 4.5, 'obligatoria', 3, 1, NULL, 7);
-INSERT INTO asignatura VALUES (78, 'Bioinformática', 4.5, 'obligatoria', 3, 2, NULL, 7);
-INSERT INTO asignatura VALUES (79, 'Biotecnología de los productos hortofrutículas', 4.5, 'obligatoria', 3, 2, NULL, 7);
-INSERT INTO asignatura VALUES (80, 'Biotecnología vegetal', 6, 'obligatoria', 3, 2, NULL, 7);
-INSERT INTO asignatura VALUES (81, 'Genómica y proteómica', 4.5, 'obligatoria', 3, 2, NULL, 7);
-INSERT INTO asignatura VALUES (82, 'Procesos biotecnológicos', 6, 'obligatoria', 3, 2, NULL, 7);
-INSERT INTO asignatura VALUES (83, 'Técnicas instrumentales avanzadas', 4.5, 'obligatoria', 3, 2, NULL, 7);
 
-/* Curso escolar */
-INSERT INTO curso_escolar VALUES (1, 2014, 2015);
-INSERT INTO curso_escolar VALUES (2, 2015, 2016);
-INSERT INTO curso_escolar VALUES (3, 2016, 2017);
-INSERT INTO curso_escolar VALUES (4, 2017, 2018);
-INSERT INTO curso_escolar VALUES (5, 2018, 2019);
 
-/* Alumno se matricula en asignatura */
-INSERT INTO alumno_se_matricula_asignatura VALUES (1, 1, 1);
-INSERT INTO alumno_se_matricula_asignatura VALUES (1, 2, 1);
-INSERT INTO alumno_se_matricula_asignatura VALUES (1, 3, 1);
-INSERT INTO alumno_se_matricula_asignatura VALUES (2, 1, 1);
-INSERT INTO alumno_se_matricula_asignatura VALUES (2, 2, 1);
-INSERT INTO alumno_se_matricula_asignatura VALUES (2, 3, 1);
-INSERT INTO alumno_se_matricula_asignatura VALUES (4, 1, 1);
-INSERT INTO alumno_se_matricula_asignatura VALUES (4, 2, 1);
-INSERT INTO alumno_se_matricula_asignatura VALUES (4, 3, 1);
-INSERT INTO alumno_se_matricula_asignatura VALUES (24, 1, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (24, 2, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (24, 3, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (24, 4, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (24, 5, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (24, 6, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (24, 7, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (24, 8, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (24, 9, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (24, 10, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (23, 1, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (23, 2, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (23, 3, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (23, 4, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (23, 5, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (23, 6, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (23, 7, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (23, 8, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (23, 9, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (23, 10, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (19, 1, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (19, 2, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (19, 3, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (19, 4, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (19, 5, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (19, 6, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (19, 7, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (19, 8, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (19, 9, 5);
-INSERT INTO alumno_se_matricula_asignatura VALUES (19, 10, 5);
+ALTER TABLE public.curso_escolar OWNER TO postgres;
+
+--
+-- Name: curso_escolar_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.curso_escolar_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.curso_escolar_id_seq OWNER TO postgres;
+
+--
+-- Name: curso_escolar_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.curso_escolar_id_seq OWNED BY public.curso_escolar.id;
+
+
+--
+-- Name: departamento; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.departamento (
+    id integer NOT NULL,
+    nombre character varying(50) NOT NULL
+);
+
+
+ALTER TABLE public.departamento OWNER TO postgres;
+
+--
+-- Name: departamento_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.departamento_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.departamento_id_seq OWNER TO postgres;
+
+--
+-- Name: departamento_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.departamento_id_seq OWNED BY public.departamento.id;
+
+
+--
+-- Name: grado; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.grado (
+    id integer NOT NULL,
+    nombre character varying(100) NOT NULL
+);
+
+
+ALTER TABLE public.grado OWNER TO postgres;
+
+--
+-- Name: grado_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.grado_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.grado_id_seq OWNER TO postgres;
+
+--
+-- Name: grado_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.grado_id_seq OWNED BY public.grado.id;
+
+
+--
+-- Name: persona; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.persona (
+    id integer NOT NULL,
+    nif character varying(9),
+    nombre character varying(25) NOT NULL,
+    apellido1 character varying(50) NOT NULL,
+    apellido2 character varying(50),
+    ciudad character varying(25) NOT NULL,
+    direccion character varying(50) NOT NULL,
+    telefono character varying(9),
+    fecha_nacimiento date NOT NULL,
+    sexo character(1) NOT NULL,
+    tipo character(15) NOT NULL,
+    CONSTRAINT persona_sexo_check CHECK ((sexo = ANY (ARRAY['H'::bpchar, 'M'::bpchar]))),
+    CONSTRAINT persona_tipo_check CHECK ((tipo = ANY (ARRAY['profesor'::bpchar, 'alumno'::bpchar])))
+);
+
+
+ALTER TABLE public.persona OWNER TO postgres;
+
+--
+-- Name: persona_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.persona_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.persona_id_seq OWNER TO postgres;
+
+--
+-- Name: persona_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.persona_id_seq OWNED BY public.persona.id;
+
+
+--
+-- Name: profesor; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.profesor (
+    id_profesor integer NOT NULL,
+    id_departamento integer NOT NULL
+);
+
+
+ALTER TABLE public.profesor OWNER TO postgres;
+
+--
+-- Name: profesor_id_departamento_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.profesor_id_departamento_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.profesor_id_departamento_seq OWNER TO postgres;
+
+--
+-- Name: profesor_id_departamento_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.profesor_id_departamento_seq OWNED BY public.profesor.id_departamento;
+
+
+--
+-- Name: profesor_id_profesor_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.profesor_id_profesor_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.profesor_id_profesor_seq OWNER TO postgres;
+
+--
+-- Name: profesor_id_profesor_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.profesor_id_profesor_seq OWNED BY public.profesor.id_profesor;
+
+
+--
+-- Name: asignatura id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignatura ALTER COLUMN id SET DEFAULT nextval('public.asignatura_id_seq'::regclass);
+
+
+--
+-- Name: curso_escolar id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.curso_escolar ALTER COLUMN id SET DEFAULT nextval('public.curso_escolar_id_seq'::regclass);
+
+
+--
+-- Name: departamento id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.departamento ALTER COLUMN id SET DEFAULT nextval('public.departamento_id_seq'::regclass);
+
+
+--
+-- Name: grado id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.grado ALTER COLUMN id SET DEFAULT nextval('public.grado_id_seq'::regclass);
+
+
+--
+-- Name: persona id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.persona ALTER COLUMN id SET DEFAULT nextval('public.persona_id_seq'::regclass);
+
+
+--
+-- Name: profesor id_profesor; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.profesor ALTER COLUMN id_profesor SET DEFAULT nextval('public.profesor_id_profesor_seq'::regclass);
+
+
+--
+-- Name: profesor id_departamento; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.profesor ALTER COLUMN id_departamento SET DEFAULT nextval('public.profesor_id_departamento_seq'::regclass);
+
+
+--
+-- Data for Name: alumno_se_matricula_asignatura; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.alumno_se_matricula_asignatura (id_alumno, id_asignatura, id_curso_escolar) FROM stdin;
+1	1	1
+1	2	1
+1	3	1
+2	1	1
+2	2	1
+2	3	1
+4	1	1
+4	2	1
+4	3	1
+24	1	5
+24	2	5
+24	3	5
+24	4	5
+24	5	5
+24	6	5
+24	7	5
+24	8	5
+24	9	5
+24	10	5
+23	1	5
+23	2	5
+23	3	5
+23	4	5
+23	5	5
+23	6	5
+23	7	5
+23	8	5
+23	9	5
+23	10	5
+19	1	5
+19	2	5
+19	3	5
+19	4	5
+19	5	5
+19	6	5
+19	7	5
+19	8	5
+19	9	5
+19	10	5
+\.
+
+
+--
+-- Data for Name: asignatura; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.asignatura (id, nombre, creditos, tipo, curso, cuatrimestre, id_profesor, id_grado) FROM stdin;
+1	µlgegra lineal y matem tica discreta	6	b sica	1	1	3	4
+2	C lculo	6	b sica	1	1	14	4
+3	F¡sica para inform tica	6	b sica	1	1	3	4
+4	Introducci¢n a la programaci¢n	6	b sica	1	1	14	4
+5	Organizaci¢n y gesti¢n de empresas	6	b sica	1	1	3	4
+6	Estad¡stica	6	b sica	1	2	14	4
+7	Estructura y tecnolog¡a de computadores	6	b sica	1	2	3	4
+8	Fundamentos de electr¢nica	6	b sica	1	2	14	4
+9	L¢gica y algor¡tmica	6	b sica	1	2	3	4
+10	Metodolog¡a de la programaci¢n	6	b sica	1	2	14	4
+11	Arquitectura de Computadores	6	b sica	2	1	3	4
+12	Estructura de Datos y Algoritmos I	6	obligatoria	2	1	3	4
+13	Ingenier¡a del Software	6	obligatoria	2	1	14	4
+14	Sistemas Inteligentes	6	obligatoria	2	1	3	4
+15	Sistemas Operativos	6	obligatoria	2	1	14	4
+16	Bases de Datos	6	b sica	2	2	14	4
+17	Estructura de Datos y Algoritmos II	6	obligatoria	2	2	14	4
+18	Fundamentos de Redes de Computadores	6	obligatoria	2	2	3	4
+19	Planificaci¢n y Gesti¢n de Proyectos Inform ticos	6	obligatoria	2	2	3	4
+20	Programaci¢n de Servicios Software	6	obligatoria	2	2	14	4
+21	Desarrollo de interfaces de usuario	6	obligatoria	3	1	14	4
+22	Ingenier¡a de Requisitos	6	optativa	3	1	\N	4
+23	Integraci¢n de las Tecnolog¡as de la Informaci¢n en las Organizaciones	6	optativa	3	1	\N	4
+24	Modelado y Dise¤o del Software 1	6	optativa	3	1	\N	4
+25	Multiprocesadores	6	optativa	3	1	\N	4
+26	Seguridad y cumplimiento normativo	6	optativa	3	1	\N	4
+27	Sistema de Informaci¢n para las Organizaciones	6	optativa	3	1	\N	4
+28	Tecnolog¡as web	6	optativa	3	1	\N	4
+29	Teor¡a de c¢digos y criptograf¡a	6	optativa	3	1	\N	4
+30	Administraci¢n de bases de datos	6	optativa	3	2	\N	4
+31	Herramientas y M‚todos de Ingenier¡a del Software	6	optativa	3	2	\N	4
+32	Inform tica industrial y rob¢tica	6	optativa	3	2	\N	4
+33	Ingenier¡a de Sistemas de Informaci¢n	6	optativa	3	2	\N	4
+34	Modelado y Dise¤o del Software 2	6	optativa	3	2	\N	4
+35	Negocio Electr¢nico	6	optativa	3	2	\N	4
+36	Perif‚ricos e interfaces	6	optativa	3	2	\N	4
+37	Sistemas de tiempo real	6	optativa	3	2	\N	4
+38	Tecnolog¡as de acceso a red	6	optativa	3	2	\N	4
+39	Tratamiento digital de im genes	6	optativa	3	2	\N	4
+40	Administraci¢n de redes y sistemas operativos	6	optativa	4	1	\N	4
+41	Almacenes de Datos	6	optativa	4	1	\N	4
+42	Fiabilidad y Gesti¢n de Riesgos	6	optativa	4	1	\N	4
+43	L¡neas de Productos Software	6	optativa	4	1	\N	4
+44	Procesos de Ingenier¡a del Software 1	6	optativa	4	1	\N	4
+45	Tecnolog¡as multimedia	6	optativa	4	1	\N	4
+46	An lisis y planificaci¢n de las TI	6	optativa	4	2	\N	4
+47	Desarrollo R pido de Aplicaciones	6	optativa	4	2	\N	4
+48	Gesti¢n de la Calidad y de la Innovaci¢n Tecnol¢gica	6	optativa	4	2	\N	4
+49	Inteligencia del Negocio	6	optativa	4	2	\N	4
+50	Procesos de Ingenier¡a del Software 2	6	optativa	4	2	\N	4
+51	Seguridad Inform tica	6	optativa	4	2	\N	4
+52	Biologia celular	6	b sica	1	1	\N	7
+53	F¡sica	6	b sica	1	1	\N	7
+54	Matem ticas I	6	b sica	1	1	\N	7
+55	Qu¡mica general	6	b sica	1	1	\N	7
+56	Qu¡mica org nica	6	b sica	1	1	\N	7
+57	Biolog¡a vegetal y animal	6	b sica	1	2	\N	7
+58	Bioqu¡mica	6	b sica	1	2	\N	7
+59	Gen‚tica	6	b sica	1	2	\N	7
+60	Matem ticas II	6	b sica	1	2	\N	7
+61	Microbiolog¡a	6	b sica	1	2	\N	7
+62	Bot nica agr¡cola	6	obligatoria	2	1	\N	7
+63	Fisiolog¡a vegetal	6	obligatoria	2	1	\N	7
+64	Gen‚tica molecular	6	obligatoria	2	1	\N	7
+65	Ingenier¡a bioqu¡mica	6	obligatoria	2	1	\N	7
+66	Termodin mica y cin‚tica qu¡mica aplicada	6	obligatoria	2	1	\N	7
+67	Biorreactores	6	obligatoria	2	2	\N	7
+68	Biotecnolog¡a microbiana	6	obligatoria	2	2	\N	7
+69	Ingenier¡a gen‚tica	6	obligatoria	2	2	\N	7
+70	Inmunolog¡a	6	obligatoria	2	2	\N	7
+71	Virolog¡a	6	obligatoria	2	2	\N	7
+72	Bases moleculares del desarrollo vegetal	4.5	obligatoria	3	1	\N	7
+73	Fisiolog¡a animal	4.5	obligatoria	3	1	\N	7
+74	Metabolismo y bios¡ntesis de biomol‚culas	6	obligatoria	3	1	\N	7
+75	Operaciones de separaci¢n	6	obligatoria	3	1	\N	7
+76	Patolog¡a molecular de plantas	4.5	obligatoria	3	1	\N	7
+77	T‚cnicas instrumentales b sicas	4.5	obligatoria	3	1	\N	7
+78	Bioinform tica	4.5	obligatoria	3	2	\N	7
+79	Biotecnolog¡a de los productos hortofrut¡culas	4.5	obligatoria	3	2	\N	7
+80	Biotecnolog¡a vegetal	6	obligatoria	3	2	\N	7
+81	Gen¢mica y prote¢mica	4.5	obligatoria	3	2	\N	7
+82	Procesos biotecnol¢gicos	6	obligatoria	3	2	\N	7
+83	T‚cnicas instrumentales avanzadas	4.5	obligatoria	3	2	\N	7
+\.
+
+
+--
+-- Data for Name: curso_escolar; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.curso_escolar (id, year_inicio, year_fin) FROM stdin;
+1	2014-01-01	2015-01-01
+2	2015-01-01	2016-01-01
+3	2016-01-01	2017-01-01
+4	2017-01-01	2018-01-01
+5	2018-01-01	2019-01-01
+\.
+
+
+--
+-- Data for Name: departamento; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.departamento (id, nombre) FROM stdin;
+1	Inform tica
+2	Matem ticas
+3	Econom¡a y Empresa
+4	Educaci¢n
+5	Agronom¡a
+6	Qu¡mica y F¡sica
+7	Filolog¡a
+8	Derecho
+9	Biolog¡a y Geolog¡a
+\.
+
+
+--
+-- Data for Name: grado; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.grado (id, nombre) FROM stdin;
+1	Grado en Ingenier¡a Agr¡cola (Plan 2015)
+2	Grado en Ingenier¡a El‚ctrica (Plan 2014)
+3	Grado en Ingenier¡a Electr¢nica Industrial (Plan 2010)
+4	Grado en Ingenier¡a Inform tica (Plan 2015)
+5	Grado en Ingenier¡a Mec nica (Plan 2010)
+6	Grado en Ingenier¡a Qu¡mica Industrial (Plan 2010)
+7	Grado en Biotecnolog¡a (Plan 2015)
+8	Grado en Ciencias Ambientales (Plan 2009)
+9	Grado en Matem ticas (Plan 2010)
+10	Grado en Qu¡mica (Plan 2009)
+\.
+
+
+--
+-- Data for Name: persona; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.persona (id, nif, nombre, apellido1, apellido2, ciudad, direccion, telefono, fecha_nacimiento, sexo, tipo) FROM stdin;
+1	26902806M	Salvador	S nchez	P‚rez	Almer¡a	C/ Real del barrio alto	950254837	1991-03-28	H	alumno         
+2	89542419S	Juan	Saez	Vega	Almer¡a	C/ Mercurio	618253876	1992-08-08	H	alumno         
+3	11105554G	Zoe	Ramirez	Gea	Almer¡a	C/ Marte	618223876	1979-08-19	M	profesor       
+4	17105885A	Pedro	Heller	Pagac	Almer¡a	C/ Estrella fugaz	\N	2000-10-05	H	alumno         
+5	38223286T	David	Schmidt	Fisher	Almer¡a	C/ Venus	678516294	1978-01-19	H	profesor       
+6	04233869Y	Jos‚	Koss	Bayer	Almer¡a	C/ J£piter	628349590	1998-01-28	H	alumno         
+7	97258166K	Ismael	Strosin	Turcotte	Almer¡a	C/ Neptuno	\N	1999-05-24	H	alumno         
+8	79503962T	Cristina	Lemke	Rutherford	Almer¡a	C/ Saturno	669162534	1977-08-21	M	profesor       
+9	82842571K	Ram¢n	Herzog	Tremblay	Almer¡a	C/ Urano	626351429	1996-11-21	H	alumno         
+10	61142000L	Esther	Spencer	Lakin	Almer¡a	C/ Plut¢n	\N	1977-05-19	M	profesor       
+11	46900725E	Daniel	Herman	Pacocha	Almer¡a	C/ Andarax	679837625	1997-04-26	H	alumno         
+12	85366986W	Carmen	Streich	Hirthe	Almer¡a	C/ Almanzora	\N	1971-04-29	M	profesor       
+13	73571384L	Alfredo	Stiedemann	Morissette	Almer¡a	C/ Guadalquivir	950896725	1980-02-01	H	profesor       
+14	82937751G	Manolo	Hamill	Kozey	Almer¡a	C/ Duero	950263514	1977-01-02	H	profesor       
+15	80502866Z	Alejandro	Kohler	Schoen	Almer¡a	C/ Tajo	668726354	1980-03-14	H	profesor       
+16	10485008K	Antonio	Fahey	Considine	Almer¡a	C/ Sierra de los Filabres	\N	1982-03-18	H	profesor       
+17	85869555K	Guillermo	Ruecker	Upton	Almer¡a	C/ Sierra de G dor	\N	1973-05-05	H	profesor       
+18	04326833G	Micaela	Monahan	Murray	Almer¡a	C/ Veleta	662765413	1976-02-25	H	profesor       
+19	11578526G	Inma	Lakin	Yundt	Almer¡a	C/ Picos de Europa	678652431	1998-09-01	M	alumno         
+20	79221403L	Francesca	Schowalter	Muller	Almer¡a	C/ Quinto pino	\N	1980-10-31	H	profesor       
+21	79089577Y	Juan	Guti‚rrez	L¢pez	Almer¡a	C/ Los pinos	678652431	1998-01-01	H	alumno         
+22	41491230N	Antonio	Dom¡nguez	Guerrero	Almer¡a	C/ Cabo de Gata	626652498	1999-02-11	H	alumno         
+23	64753215G	Irene	Hern ndez	Mart¡nez	Almer¡a	C/ Zapillo	628452384	1996-03-12	M	alumno         
+24	85135690V	Sonia	Gea	Ruiz	Almer¡a	C/ Mercurio	678812017	1995-04-13	M	alumno         
+\.
+
+
+--
+-- Data for Name: profesor; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.profesor (id_profesor, id_departamento) FROM stdin;
+3	1
+5	2
+8	3
+10	4
+12	4
+13	6
+14	1
+15	2
+16	3
+17	4
+18	5
+20	6
+\.
+
+
+--
+-- Name: asignatura_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.asignatura_id_seq', 1, false);
+
+
+--
+-- Name: curso_escolar_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.curso_escolar_id_seq', 1, false);
+
+
+--
+-- Name: departamento_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.departamento_id_seq', 1, false);
+
+
+--
+-- Name: grado_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.grado_id_seq', 1, false);
+
+
+--
+-- Name: persona_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.persona_id_seq', 1, false);
+
+
+--
+-- Name: profesor_id_departamento_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.profesor_id_departamento_seq', 1, false);
+
+
+--
+-- Name: profesor_id_profesor_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.profesor_id_profesor_seq', 1, false);
+
+
+--
+-- Name: alumno_se_matricula_asignatura alumno_se_matricula_asignatura_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.alumno_se_matricula_asignatura
+    ADD CONSTRAINT alumno_se_matricula_asignatura_pkey PRIMARY KEY (id_alumno, id_asignatura, id_curso_escolar);
+
+
+--
+-- Name: asignatura asignatura_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignatura
+    ADD CONSTRAINT asignatura_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: curso_escolar curso_escolar_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.curso_escolar
+    ADD CONSTRAINT curso_escolar_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: departamento departamento_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.departamento
+    ADD CONSTRAINT departamento_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: grado grado_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.grado
+    ADD CONSTRAINT grado_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: persona persona_nif_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.persona
+    ADD CONSTRAINT persona_nif_key UNIQUE (nif);
+
+
+--
+-- Name: persona persona_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.persona
+    ADD CONSTRAINT persona_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: profesor profesor_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.profesor
+    ADD CONSTRAINT profesor_pkey PRIMARY KEY (id_profesor);
+
+
+--
+-- Name: alumno_se_matricula_asignatura alumno_se_matricula_asignatura_id_alumno_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.alumno_se_matricula_asignatura
+    ADD CONSTRAINT alumno_se_matricula_asignatura_id_alumno_fkey FOREIGN KEY (id_alumno) REFERENCES public.persona(id);
+
+
+--
+-- Name: alumno_se_matricula_asignatura alumno_se_matricula_asignatura_id_asignatura_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.alumno_se_matricula_asignatura
+    ADD CONSTRAINT alumno_se_matricula_asignatura_id_asignatura_fkey FOREIGN KEY (id_asignatura) REFERENCES public.asignatura(id);
+
+
+--
+-- Name: alumno_se_matricula_asignatura alumno_se_matricula_asignatura_id_curso_escolar_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.alumno_se_matricula_asignatura
+    ADD CONSTRAINT alumno_se_matricula_asignatura_id_curso_escolar_fkey FOREIGN KEY (id_curso_escolar) REFERENCES public.curso_escolar(id);
+
+
+--
+-- Name: asignatura asignatura_id_grado_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignatura
+    ADD CONSTRAINT asignatura_id_grado_fkey FOREIGN KEY (id_grado) REFERENCES public.grado(id);
+
+
+--
+-- Name: asignatura asignatura_id_profesor_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignatura
+    ADD CONSTRAINT asignatura_id_profesor_fkey FOREIGN KEY (id_profesor) REFERENCES public.profesor(id_profesor);
+
+
+--
+-- Name: profesor profesor_id_departamento_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.profesor
+    ADD CONSTRAINT profesor_id_departamento_fkey FOREIGN KEY (id_departamento) REFERENCES public.departamento(id);
+
+
+--
+-- Name: profesor profesor_id_profesor_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.profesor
+    ADD CONSTRAINT profesor_id_profesor_fkey FOREIGN KEY (id_profesor) REFERENCES public.persona(id);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
